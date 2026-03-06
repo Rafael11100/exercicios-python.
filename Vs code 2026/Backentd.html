@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspirador de Frases Groq</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 50px; background-color: #f4f4f9; 
+        }
+        .container { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            width: 350px; 
+        }
+        input { 
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; box-sizing: border-box; 
+        }
+        button { 
+            width: 100%; 
+            padding: 10px; 
+            background-color: #f35e22; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        button:hover { 
+            background-color: #d44d1a;
+        }
+        #resultado { 
+            margin-top: 20px; 
+            font-style: italic; 
+            color: #333; 
+            line-height: 1.5; 
+            text-align: center; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Inspiração IA</h2>
+    <input type="text" id="palavra" placeholder="Digite uma palavra (ex: Café)">
+    <button onclick="gerarFrase()">Gerar Frase</button>
+    <div id="resultado"></div>
+</div>
+
+<script>
+    async function gerarFrase() {
+    const palavra = document.getElementById('palavra').value;
+    const resultadoDiv = document.getElementById('resultado');
+    
+    // 1. Verifique se colou a chave corretamente aqui:
+    const API_KEY = 'SUA_CHAVE_API_AQUI'; 
+    const URL = "https://api.groq.com/openai/v1/chat/completions";
+
+    if (!palavra) {
+        alert("Digite uma palavra!");
+        return;
+    }
+
+    resultadoDiv.innerText = "Consultando a inteligência...";
+
+    try {
+        const response = await fetch(URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama-3.1-8b-instant",
+                messages: [{
+                    role: "system",
+                    content: "Responda sempre com uma frase curta de duas linhas."
+                },
+                {
+                    role: "user",
+                    content: `Crie uma frase inspiradora sobre: ${palavra}`
+                }],
+                temperature: 0.7
+            })
+        });
+
+        const data = await response.json();
+
+        // LOG DE DIAGNÓSTICO: Abra o Console do Navegador (F12) para ver isso
+        console.log("Resposta da Groq:", data);
+
+        if (data.error) {
+            resultadoDiv.innerText = "Erro da API: " + data.error.message;
+            return;
+        }
+
+        if (data.choices && data.choices.length > 0) {
+            const frase = data.choices[0].message.content;
+            resultadoDiv.innerText = frase;
+        } else {
+            resultadoDiv.innerText = "A API retornou um formato inesperado.";
+        }
+
+    } catch (error) {
+        console.error("Erro na requisição:", error);
+        resultadoDiv.innerText = "Erro de conexão. Verifique o console (F12).";
+    }
+}
+</script>
+
+</body>
+</html>
